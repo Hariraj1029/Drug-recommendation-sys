@@ -20,7 +20,7 @@
         #km:hover{
             box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
             align-self: flex-start;
-            background-color: #FFD56F;
+            background-color: #353535;
             border: none;
             border-radius: 50px;
             width: 170px;
@@ -28,7 +28,7 @@
             padding: 20px;
             margin-top: 20px;
             text-decoration: none;
-            color: black;
+            color: white;
             font-weight: 500;
             cursor: pointer;
         }
