@@ -148,7 +148,7 @@ def rev_added():
                        comments_sentiment=cs)
         db.session.add(entry)
         db.session.commit()
-    return render_template('index.html')
+    return render_template('index.html', username=session['username'])
 
 
 @app.route('/user-register', methods=['POST', 'GET'])
@@ -187,7 +187,6 @@ def login():
         userpass = str(request.form.get('password'))  # getting password from form
         # getting entry from database with email and password
         log = User.query.filter_by(email=email_id, password=userpass).first()
-        print(log.username)
         if log is not None:  # if entry exists
             session['email'] = email_id  # setting session for email
             session['username'] = log.username  # setting session for username
@@ -198,13 +197,13 @@ def login():
         else:
             msg = 'Incorrect email / password !!'
             return render_template('login.html', msg=msg)
-
+        
     return render_template('login.html')
 
 
 @app.route('/addrev')
 def addrev():
-    return render_template('addrev.html')
+    return render_template('addrev.html', username=session['username'])
 
 
 # API endpoint to send the data
@@ -226,7 +225,7 @@ def getDrugs():
             Review.drugName).distinct().all()
         a = dict()
         if(len(drugs) == 0):
-            return render_template('drugsList.html', data=None, condition=user_condition)
+            return render_template('drugsList.html', data=None, condition=user_condition, username=session['username'])
         for row in most_rated:
             if row.drugName not in a:
                 a[row.drugName] = []
@@ -245,7 +244,6 @@ def getDrugs():
 
 with app.app_context():
     conList = [x[0] for x in set(Review.query.with_entities(Review.condition).all())]
-    print(conList)
 @app.route('/')
 def home():
     return render_template('index.html', conList=conList)
