@@ -33,10 +33,21 @@ html,body{
   font-weight: 600;
   color: black;
 }
-.nav-link:hover{
-    color: #48bbc6;
-    border-radius: 10px;
+.nav-link::after{
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #333;
+  transition: width 0.3s ease-in-out; /* add a transition property */
 }
+.nav-link:hover::after{
+  width: 100%;
+}
+
 .footerblock{
     flex: 0;
   margin-top: auto;

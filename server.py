@@ -1,5 +1,6 @@
 import pandas as pd
 from flask import Flask, session, render_template, request, redirect, url_for
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from jinja2 import Environment
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
@@ -20,17 +21,21 @@ ses = Session()
 
 class Review(db.Model):
     revId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    drugName = db.Column(db.String(80),
-                         nullable=False)
-    condition = db.Column(db.String(120), nullable=False)
-    commentsReview = db.Column(db.String(500), unique=False, nullable=False)
+    drugName = db.Column(db.String(80), nullable=False)
+    condition = db.Column(db.String(120), unique=False, nullable=False)
+    commentsReview = db.Column(db.String(5000), unique=False, nullable=False)
     rating = db.Column(db.Integer, unique=False, nullable=False)
-    sideEffects = db.Column(db.String(80), unique=False, nullable=False)
-    sideEffectsReview = db.Column(db.String(500), unique=False, nullable=False)
+    sideEffects = db.Column(db.Integer, unique=False, nullable=False)
+    sideEffectsReview = db.Column(db.String(5000), unique=False, nullable=False)
     effectiveness = db.Column(db.Integer, unique=False, nullable=False)
-    benefitsReview = db.Column(db.String(500), unique=False, nullable=False)
-    sideEffectsKeywords = db.Column(
-        db.String(500), unique=False, nullable=False)
+    benefitsReview = db.Column(db.String(5000), unique=False, nullable=False)
+    sideEffectsKeywords = db.Column(db.String(500), unique=False, nullable=False)
+    benefits_review_sentiment_score = db.Column(db.Float, unique=False, nullable=False)
+    sideEffects_review_sentiment_score = db.Column(db.Float, unique=False, nullable=False)
+    comments_sentiment_score = db.Column(db.Float, unique=False, nullable=False)
+    benefits_sentiment = db.Column(db.Integer, unique=False, nullable=False)
+    sideEffects_sentiment = db.Column(db.Integer, unique=False, nullable=False)
+    comments_sentiment = db.Column(db.Integer, unique=False, nullable=False)
 
 
 class User(db.Model):
@@ -45,10 +50,7 @@ env.globals['int'] = int
 # Read the CSV file data
 df = pd.read_csv('total.csv')
 
-@app.route('/')
-def home():
-    return render_template('index.html')
-    
+
 
 @app.route('/upload')
 def upload():
@@ -60,15 +62,61 @@ def upload():
                         commentsReview=str(row['commentsReview']),
                         rating=row['rating'],
                         sideEffects=row['sideEffects'],
-                        sideEffectsReview=row['sideEffectsReview'],
+                        sideEffectsReview=str(row['sideEffectsReview']),
                         effectiveness=row['effectiveness'],
-                        benefitsReview=row['benefitsReview'],
-                        sideEffectsKeywords=row['se_keywords'])
+                        benefitsReview=str(row['benefitsReview']),
+                        sideEffectsKeywords=str(row['se_keywords']),
+                        benefits_review_sentiment_score=row['benefits_review_sentiment_score'],
+                        sideEffects_review_sentiment_score=row['sideEffects_review_sentiment_score'],
+                        comments_sentiment_score=row['comments_sentiment_score'],
+                        benefits_sentiment=row['benefits_sentiment'],
+                        sideEffects_sentiment=row['sideEffects_sentiment'],
+                        comments_sentiment=row['comments_sentiment'])
         db.session.add(record)
     db.session.commit()
 
     return 'File uploaded successfully'
 
+def calc_sentiment(benefitsReview, sideEffectsReview, commentsReview):
+
+    # Initialize the sentiment analyzer
+    sia = SentimentIntensityAnalyzer()
+    scores = sia.polarity_scores(benefitsReview)
+    res=0
+    if(scores['pos']> max(scores['neg'],scores['neu'])):
+        res = 1
+    elif(scores['neg']> max(scores['pos'],scores['neu'])):
+        res = -1
+    else:
+        res = 0
+
+    brss = scores['pos']*100
+    bs = res
+
+    scores = sia.polarity_scores(sideEffectsReview)
+    res=0
+    if(scores['pos']> max(scores['neg'],scores['neu'])):
+        res = 1
+    elif(scores['neg']> max(scores['pos'],scores['neu'])):
+        res = -1
+    else:
+        res = 0
+
+    srss = scores['pos']*100
+    ss = res
+
+    scores = sia.polarity_scores(commentsReview)
+    res=0
+    if(scores['pos']> max(scores['neg'],scores['neu'])):
+        res = 1
+    elif(scores['neg']> max(scores['pos'],scores['neu'])):
+        res = -1
+    else:
+        res = 0
+
+    css = scores['pos']*100
+    cs = res
+    return brss, srss, css, bs, ss, cs
 
 @app.route('/rev-added', methods=['POST', 'GET'])
 def rev_added():
@@ -82,6 +130,7 @@ def rev_added():
         effectiveness = request.form.get('effectiveness')
         benefitsReview = request.form.get('benefitsReview')
         sideEffectsKeywords = request.form.get('se-key')
+        brss, srss, css, bs, ss, cs = calc_sentiment(benefitsReview, sideEffectsReview, commentsReview)
         entry = Review(drugName=drugName,
                        condition=condition,
                        commentsReview=commentsReview,
@@ -90,7 +139,13 @@ def rev_added():
                        sideEffectsReview=sideEffectsReview,
                        effectiveness=effectiveness,
                        benefitsReview=benefitsReview,
-                       sideEffectsKeywords=sideEffectsKeywords)
+                       sideEffectsKeywords=sideEffectsKeywords,
+                       benefits_review_sentiment_score=brss,
+                       sideEffects_review_sentiment_score=srss,
+                       comments_sentiment_score=css,
+                       benefits_sentiment=bs,
+                       sideEffects_sentiment=ss,
+                       comments_sentiment=cs)
         db.session.add(entry)
         db.session.commit()
     return render_template('index.html')
@@ -155,38 +210,46 @@ def addrev():
 # API endpoint to send the data
 @app.route('/searched', methods=['POST'])
 def getDrugs():
-    # print(data)
-    # Do something with the data
-    user_condition = request.form.get('search')
+    with app.app_context():
+        # print(data)
+        # Do something with the data
+        user_condition = request.form.get('search')
+        most_rated = Review.query.order_by(
+            Review.rating.desc(), Review.sideEffects.desc(), Review.effectiveness.desc(), Review.benefits_review_sentiment_score.desc(), Review.sideEffects_review_sentiment_score.desc()).filter_by(condition=user_condition).all()
+        # Getting the rows which are having rating > 5 and also satisfied the user condition
 
-    # Getting the rows which are having rating > 5 and also satisfied the user condition
-    gt5 = test_data[test_data['rating'] > 5]
-    cond_rows = gt5[gt5['condition'] == user_condition]
 
+        # Sorting and storing the records based on the rating values
 
-    # Sorting and storing the records based on the rating value
-    most_rated = cond_rows.sort_values(by=['rating', 'effectiveness', 'sideEffects'], ascending=False)
+        # List of Drug names for a particular condition given by the user
+        drugs = Review.query.filter_by(condition=user_condition).with_entities(
+            Review.drugName).distinct().all()
+        a = dict()
+        if(len(drugs) == 0):
+            return render_template('drugsList.html', data=None, condition=user_condition)
+        for row in most_rated:
+            if row.drugName not in a:
+                a[row.drugName] = []
+            t = {
+        'rating': int(row.rating),
+            'effectiveness': row.effectiveness,
+            'sideEffects': row.sideEffects,
+            'condition' : row.condition,
+            'benefitsReview' : row.benefitsReview,
+            'sideEffectsReview' : row.sideEffectsReview        
+        }
+            a[row.drugName].append(t)
+        di = a
+        
+        return render_template('drugsList.html', data=di, condition = user_condition)
 
-    # List of Drug names for a particular condition given by the user
-    drugs = [x for x in most_rated['urlDrugName']]  
-    a = dict()
-    if(len(drugs) == 0):
-        return render_template('drugsList.html', data=None, condition=user_condition, eff=eff, side=side)
-    for index, row in most_rated.iterrows():
-        if row['urlDrugName'] not in a:
-            a[row['urlDrugName']] = []
-        t = {
-      'rating': int(row['rating']),
-        'effectiveness': row['effectiveness'],
-        'sideEffects': row['sideEffects'],
-        'condition' : row['condition'],
-        'benefitsReview' : row['benefitsReview'],
-        'sideEffectsReview' : row['sideEffectsReview']          
-    }
-        a[row['urlDrugName']].append(t)
-    di = a
-    
-    return render_template('drugsList.html', data=di, condition = user_condition, eff=eff, side=side)
+with app.app_context():
+    conList = [x[0] for x in set(Review.query.with_entities(Review.condition).all())]
+    print(conList)
+@app.route('/')
+def home():
+    return render_template('index.html', conList=conList)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    with app.app_context():
+        app.run(debug=True)
