@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/register.css')}}">
+    <title>User Registration</title>
+</head>
+<body>
+    <div class="box">
+        <h1>User Registration</h1>
+        <form action="/register" method="POST">
+            <input type="text" name="username" id="username" placeholder="User Name">
+            <input type="email" name="email_id" id="email_id" placeholder="Enter your Email">
+            <input type="password" name="password" id="password" placeholder="Password">
+            <input type="submit" value="Register">
+            <a href="/user-login">Login here</a>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='/css/login.css')}}">
+    <title>User Login</title>
+</head>
+<body>
+    <div class="box">
+        <h1>User Login</h1>
+        <form action="/login" method="POST">
+            <input type="text" name="email_id" id="email_id" placeholder="Enter your email">
+            <input type="password" name="password" id="password" placeholder="Password">
+            <input type="submit" value="Login">
+            <p>{{msg}}</p>
+            <a href="/register">Register Here</a>
+        </form>
+    </div>
+</body>
+</html>

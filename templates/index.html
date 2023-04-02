@@ -1,0 +1,44 @@
+{% extends "navbar.html" %}
+
+{% block head %}
+<link rel="stylesheet"  type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="stylesheet"  type="text/css" href="{{ url_for('static', filename='css/index480.css') }}">
+<link rel="stylesheet"  type="text/css" href="{{ url_for('static', filename='css/index768.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="intro">
+    <div class="violet-box">
+        <h1 id="mhbt">Making health better together</h1>
+        <a id ="km" href="#aboutblock">know more</a>
+    </div>
+</div>
+<div id="aboutblock">
+    <div id="about">
+    <h1>About Us</h1>
+    <br>
+    <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Consectetur ipsam quos reiciendis, voluptatibus quo maiores, vero repellendus consequuntur officia ea corrupti aliquid! Blanditiis iusto accusantium eius cupiditate, suscipit non velit.</p>
+    <br>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laudantium aliquam magni officiis accusamus, nisi facere non dignissimos dolorem mollitia, odio recusandae praesentium repellat vero earum tempora molestiae porro! Itaque, necessitatibus?</p>
+</div>
+</div>
+
+
+    <div class="search">
+        <form action="/searched" method="post">
+            <div class="search-s">
+                <input list="magicHouses"  id="search" name="search" placeholder="Provide your condition here" required />
+            <datalist id="magicHouses">
+                {% for drugName in conList %}
+                    <option value = "{{drugName}}">
+                {% endfor %}
+            </datalist>
+            <button id="bt" type="submit" name="submit-search"><i class="fa fa-search"></i></button>
+            </div>
+           
+        </form>
+
+    </div>
+   
+    
+{% endblock %}

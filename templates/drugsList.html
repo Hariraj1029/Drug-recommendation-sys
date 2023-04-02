@@ -1,0 +1,149 @@
+{% extends 'navbar.html' %}
+{% block head %}
+
+    <style>
+        #nam{
+            font-size: 30px;
+            font-weight: 500;
+            margin-bottom: 0px;
+            display: block;
+        }
+        .drugsContainer{
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items:center;
+            overflow: hidden;
+            padding-top: 20px;
+        }
+        .drug{
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            width: 530px;
+            height: max-content;
+            border-radius: 10px;
+            margin: 15px;
+            padding: 60px;
+            
+            background-color: #97DECE;
+            box-shadow: 0 0 20px 0 #97DECE;
+            transition: 0.5s;
+            
+        }
+        .drug:hover{
+            box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
+        }
+        #heading{
+            text-align: center;
+            margin-bottom: 0px;
+            font-size: 40px;
+            font-weight: 500;
+            background-color: #439A97;
+            padding: 15px;
+            color: #ffffff;
+            box-shadow: 0 0 20px 0 rgba(0,0,0,0.3);
+            position: sticky;
+            top: 67px;
+            z-index: 1;
+        }
+        .sr{
+            display: none;
+            margin-top: 2%;
+            background-color: #FFD56F;
+            padding-left: 3%;
+            padding-right: 3%;
+            padding-top: 2%;
+            padding-bottom: 2%;
+            border-radius: 10px;
+            box-shadow: 0 0 10px 0 rgba(0,0,0,0.3);
+        }
+        .be{
+            display: none;
+            margin-top: 2%;
+            background-color: #FFB26B;
+            padding-left: 3%;
+            padding-right: 3%;
+            padding-top: 2%;
+            padding-bottom: 2%;
+            border-radius: 10px;
+            box-shadow: 0 0 10px 0 rgba(0,0,0,0.3);
+        }
+        .thr{
+            display: none;
+            flex-direction: column;
+            margin-top: 10px;
+            background-color: #F8CBA6;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px 0 rgba(0,0,0,0.3);
+        }
+        .sml{
+            font-size: 20px;
+            font-weight: 500;
+        }
+        hr{
+            display: none;
+        }
+    </style>
+    
+{% endblock %}
+
+
+{% block body %}
+    {% if data %}
+    <h1 id="heading">Drugs for {{condition}}</h1>
+    <div class="drugsContainer">
+         {% for key, value in data.items() %}
+    <div class="drug" id="{{key}}" onclick="showDrugDetails(this.id)">
+        <h1 id="nam" >{{key}}</h1>
+        {% for item in value %}
+        <hr>
+        <div class="thr">
+            <h3 id="rat">Rating: <span class="sml">{{item['rating']}}</span></h3>
+            <h3 id="eff">Effectiveness: <span class="sml">{{item['effectiveness']}}</span></h3>
+            <h3 id="se">Side effects: <span class="sml">{{item['sideEffects']}}</span></h3>
+        </div>
+        <div class="be">
+            <h3>Benefits review: </h3>
+            <h6><i>{{item['benefitsReview']}}</i></h6>
+        </div>
+        <div class="sr">
+            <h3>Side effects review: </h3>
+            <h6><i>{{item['sideEffectsReview']}}</i></h6>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    </div>
+
+    {% else %}
+    <h1>No drugs found</h1>
+{% endif %}
+<script>
+    function showDrugDetails(d_id){
+        var drugDetails = document.getElementById(d_id);
+        var children = drugDetails.children;
+        for (var i = 0; i < children.length; i++) {
+            if(children[i].id == "nam")
+            {
+                continue;
+            }
+            if(children[i].className == "thr")
+            {
+                if(children[i].style.display == "none"){
+                console.log(children[i].style.display);// Not going here check this out!!!
+                children[i].style.display = "flex";
+                }
+                else
+                children[i].style.display = "none";
+            }
+            else if(children[i].style.display == "none")
+            children[i].style.display = "block";
+            else
+            children[i].style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

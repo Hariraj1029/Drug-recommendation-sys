@@ -1,0 +1,50 @@
+@media screen and (max-width: 480px){
+        .intro{
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .violet-box{
+            width: 80vw;
+            height: 30vh;
+            margin-left: 0px;
+        }
+        .capsule_pic{
+            width: 80vw;
+            height: 30vh;
+        }
+        #km{
+            align-self: flex-start;
+            margin-top: 10px;
+        }
+        #km:hover{
+            box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+            align-self: flex-start;
+            background-color: #FFD56F;
+            border: none;
+            border-radius: 50px;
+            width: 170px;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            text-decoration: none;
+            color: black;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        #mhbt{
+            font-size: 30px;
+            font-weight: 500;
+            margin-top: 20px;
+        }
+        #about{
+            margin: 50px 30px 50px 30px;
+            padding: 50px;
+        }
+        #about h1{
+        font-size: 30px;
+        }
+        #about p{
+        font-size: 11px;
+        }
+    }
